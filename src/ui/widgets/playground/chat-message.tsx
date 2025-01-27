@@ -10,7 +10,7 @@ import python from 'highlight.js/lib/languages/python';
 import ts from 'highlight.js/lib/languages/typescript';
 import { common, createLowlight } from 'lowlight';
 import * as React from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BiRefresh, BiTrash } from 'react-icons/bi';
 import { Markdown } from 'tiptap-markdown';
 
@@ -41,11 +41,16 @@ export default function ChatMessageBox({
   setContent,
   onDelete,
 }: ChatMessageProps) {
-  const textareaRef = useRef<HTMLDivElement>(null);
   const divRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  //const [message, setMessage] = useState(content);
   const [isEditing, setIsEditing] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.scrollTop = editorRef.current?.scrollHeight;
+    }
+  }, [content]);
 
   const editor = useEditor({
     content: content,
@@ -108,7 +113,7 @@ export default function ChatMessageBox({
     editorProps: {
       attributes: {
         class:
-          'transition w-full text-sm border-none focus:ring-0 outline-none max-w-none prose prose-sm sm:prose lg:prose-lg mx-auto',
+          'transition w-full text-sm border-none focus:ring-0 outline-none max-w-none prose prose-sm sm:prose lg:prose-lg mx-auto overflow-y-auto',
       },
     },
     onUpdate: ({ editor }) => {
@@ -173,7 +178,6 @@ export default function ChatMessageBox({
 
       <div>
         <EditorContent
-          ref={textareaRef}
           editor={editor}
           className={cn(
             'w-full resize-none px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-base',
@@ -185,6 +189,7 @@ export default function ChatMessageBox({
           autoFocus={isEditing}
           onClick={onMessageClick}
         />
+        <div ref={editorRef} />
       </div>
     </div>
   );
